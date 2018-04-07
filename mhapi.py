@@ -40,9 +40,6 @@ class Recipe(Resource):
         
         for requirement in recipe['requirements']:
             requirement['found'] = requirement['item'] in feed.foundRequirements
-           
-        #test
-        recipe['requirements'][1]['found'] = True
             
         return jsonify(recipe)
 
