@@ -72,7 +72,7 @@ api.add_resource(Step, '/step/<int:id>')
         
 if __name__ == '__main__':
     try:
-        #feed.start()
+        feed.start()
         app.run(port=2600)
     except KeyboardInterrupt:
         feed.stop()

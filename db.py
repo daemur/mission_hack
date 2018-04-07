@@ -1,11 +1,11 @@
-recipes = {'Test Recipe': {'requirements': [{'item': 'Test Item 1',
+recipes = {'Test Recipe': {'requirements': [{'item': 'Red',
                                              'optional': False},
-                                            {'item': 'Test Item 2',
+                                            {'item': 'Yellow',
                                              'optional': True}],
                            'steps': [{'name' : 'Test Step 1',
-                                      'item' : 'Test Item 1'},
+                                      'item' : ['Red']},
                                      {'name' : 'Test Step 2',
-                                      'item' : 'Test Item 2'}]}}
+                                      'item' : ['Yellow']}]}}
 
 items = {'Red': {'color': [4, 98, 46]},
          'Orange': {'color': [9, 100, 58]},
