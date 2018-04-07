@@ -36,7 +36,7 @@ class Recipe(Resource):
                     feed.reset_found_requirements()
                     feed.set_requirements([x['item'] for x in recipe['requirements']])
         
-            recipe['steps'][0]['currentStep'] = True
+            recipe['currentStep'] = 0
         
         for requirement in recipe['requirements']:
             requirement['found'] = requirement['item'] in feed.foundRequirements
@@ -52,15 +52,19 @@ class Step(Resource):
         
         global recipe
 
-        recipe['steps'][id]['currentStep'] = True
-        recipe['steps'][id]['completed'] = True
+        
         if id != 0:
-            recipe['steps'][id - 1]['currentStep'] = False
             recipe['steps'][id - 1]['completed'] = True
         
-        feed.set_requirements([x for x in recipe['steps'][id]['item']])
+        if id <= len(recipe['steps']) - 1:
+            recipe['steps'][id]['completed'] = False
+            feed.set_requirements([x for x in recipe['steps'][id]['item']])
+            recipe['currentStep'] = id
+            return jsonify(recipe['steps'][id])
+        else:
+            feed.set_requirements()
+            return {'done' : True}
             
-        return jsonify(recipe['steps'][id])
         
 api.add_resource(Recipes, '/recipes')
 api.add_resource(Recipe, '/recipes/<string:recipeName>')
