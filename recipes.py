@@ -1,0 +1,1 @@
+recipes = {'test' : {'requirements' : ['thing_1', 'thing_2']}}
