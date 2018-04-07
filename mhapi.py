@@ -34,7 +34,7 @@ class Recipe(Resource):
                     recipe = recipes[recipeName]
                     recipe['name'] = recipeName
                     feed.reset_found_requirements()
-                    feed.set_requirements([x['name'] for x in recipe['requirements']])
+                    feed.set_requirements([x['item'] for x in recipe['requirements']])
         
             recipe['steps'][0]['currentStep'] = True
         
