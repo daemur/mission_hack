@@ -19,6 +19,7 @@ class FeedEater(Thread):
         self.__run = True
         # Recipe stuff
         self.__recipe = None
+        self.foundRequirements = []
         # Thread init
         Thread.__init__(self)
 
@@ -27,23 +28,28 @@ class FeedEater(Thread):
             self.__stream = cv2.VideoCapture(0)
             while self.__run:
                 # Grab a frame
-                pass
-                # Find objects and draw them
+                success, frame = self.__stream.read()
+                success, frame = self.__stream.read()
+                # Do recipe stuff to the image
                 if self.__recipe is not None:
+                    # Find recipe information
                     self.__lock.acquire()
                     recipe = db.recipes[self.__recipe]
                     self.__lock.release()
+                    # Get items from requirements
+                    items = [db.items[r['item']] for r in recipe['requirements']]
+                    # Find recipe items in frame
+                    # TODO
+                    # Draw item information on frame
+                    # TODO
                 # Forward stream to ffmpeg
                 # thx Brandon
             self.__stream.release()
             self.__stream = None
-        except:
+        finally:
             if self.__stream is not None:
                 self.__stream.release()
                 self.__stream = None
-
-    def __del__(self):
-        self.stop()
 
     def stop(self):
         if self.__stream is None:
@@ -55,69 +61,8 @@ class FeedEater(Thread):
     def set_recipe(self, recipe = None):
         self.__lock.acquire()
         self.__recipe = recipe
+        self.__foundRequirements = []
         self.__lock.release()
-
-    def find_items(self, items):
-        '''
-        Looks for the given list of items in the video feed.
-
-        Requires the stream to be started.
-
-        Args:
-            items (list(Item)): List of items to be searched for.
-
-        Returns:
-            list(ItemResult): List of results.
-        '''
-        results = []
-        for item in items:
-            results.append(self.find_item(item))
-        return results
-
-    def find_item(self, item):
-        '''
-        Looks for the given item in the video feed.
-
-        Requires the stream to be started.
-
-        Args:
-            item (str): Item to be searched for.
-        '''
-        if self.__stream is None:
-            raise StreamNotStartedException()
-        # Read the frame twice because otherwise you get an old frame
-        success, frame = self.__stream.read()
-        success, frame = self.__stream.read()
-        # Recognize stuff here
-        return ItemResult()
-
-    def __get_frame(self):
-        '''
-        Gets a frame from the webcam stream.
-
-        Returns:
-            image: A cv2 image.
-        '''
-        return "Hi, I'm an image!"
-
-class Streamer(Thread):
-    def __init__(self, cameraIndex):
-        self.__stream = None
-
-    def run(self):
-        self.__stream = cv2.VideoCapture(0)
-
-class ItemResult(object):
-    '''
-    Attributes:
-        item (Item): The Item that was being looked up.
-        found (bool): If the item was found.
-        position (Vector2): The position of the item, if it was found.
-    '''
-    def __init__(self, **kwargs):
-        self.item = None
-        self.found = False
-        self.position = Vector2(-1, -1)
 
 class Vector2(object):
     '''
