@@ -31,6 +31,7 @@ class FeedEater(Thread):
         '''
         if self.__stream is None:
             raise StreamNotStartedException()
+        self.__stream.release()
         self.__stream = None
 
     def find_items(self, items):
@@ -61,7 +62,9 @@ class FeedEater(Thread):
         '''
         if self.__stream is None:
             raise StreamNotStartedException()
-        frame = self.__get_frame()
+        # Read the frame twice because otherwise you get an old frame
+        success, frame = self.__stream.read()
+        success, frame = self.__stream.read()
         # Recognize stuff here
         return ItemResult()
 
@@ -73,6 +76,13 @@ class FeedEater(Thread):
             image: A cv2 image.
         '''
         return "Hi, I'm an image!"
+
+class Streamer(Thread):
+    def __init__(self, cameraIndex):
+        self.__stream = None
+
+    def run(self):
+        self.__stream = cv2.VideoCapture(0)
 
 class ItemResult(object):
     '''
