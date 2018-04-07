@@ -9,12 +9,15 @@ api = Api(app)
 
 class Recipes(Resource):
     
-    def post(self, recipeName):
-        try:
-            self.recipe = recipes[recipeName]
-        except:
-            raise 'Recipe Not Found.'
-            
+    def get(self):
+        
+        return jsonify(recipes)
+
+class Recipe(Resource):
+    
+    def get(self, recipeName):
+        
+        self.recipe = recipes[recipeName]
         return jsonify(self.recipe['requirements'])
 
 class Inventory(Resource):
@@ -22,7 +25,8 @@ class Inventory(Resource):
     def get(self):
         return None
         
-api.add_resource(Recipes, '/recipes/<recipeName>')
+api.add_resource(Recipes, '/recipes/')
+api.add_resource(Recipe, '/recipes/<recipeName>')
 api.add_resource(Inventory, '/inventory')
         
 if __name__ == '__main__':
