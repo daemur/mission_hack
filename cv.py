@@ -1,4 +1,6 @@
 from threading import Thread, Condition
+from colorsys import hsv_to_rgb
+import numpy as np
 import cv2
 
 import db
@@ -18,38 +20,63 @@ class FeedEater(Thread):
         self.__lock = Condition()
         self.__run = True
         # Recipe stuff
-        self.__recipe = None
-        self.foundRequirements = []
+        self.__requirements = set()
+        self.__foundRequirements = set()
         # Thread init
         Thread.__init__(self)
 
     def run(self):
         try:
             self.__stream = cv2.VideoCapture(0)
-            while self.__run:
-                # Grab a frame
-                success, frame = self.__stream.read()
-                success, frame = self.__stream.read()
-                # Do recipe stuff to the image
-                if self.__recipe is not None:
-                    # Find recipe information
-                    self.__lock.acquire()
-                    recipe = db.recipes[self.__recipe]
-                    self.__lock.release()
-                    # Get items from requirements
-                    items = [db.items[r['item']] for r in recipe['requirements']]
-                    # Find recipe items in frame
-                    # TODO
-                    # Draw item information on frame
-                    # TODO
-                # Forward stream to ffmpeg
-                # thx Brandon
-            self.__stream.release()
+            if self.__stream.isOpened():
+                print('Stream started.')
+                while self.__run:
+                    # Grab a frame
+                    success, frame = self.__stream.read()
+                    if not success:
+                        break
+                    success, frame = self.__stream.read()
+                    if not success:
+                        break
+                    # Do recipe stuff to the image
+                    if self.__requirements:
+                        # Get items from requirements
+                        self.__lock.acquire()
+                        items = set(self.__requirements)
+                        self.__lock.release()
+                        # Convert frame to HSV
+                        hsvFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+                        # Find recipe items in frame
+                        for item in items:
+                            low = hsv_to_bgr(*db.items[item]['lower'])
+                            high = hsv_to_bgr(*db.items[item]['upper'])
+                            # Threshold
+                            masked = cv2.inRange(hsvFrame,
+                                                 np.array([min(*c) for c in zip(low, high)]),
+                                                 np.array([max(*c) for c in zip(low, high)]))
+                            # Filter noise
+                            filtered = cv2.medianBlur(masked, 5)
+                            # Contour
+                            _, contours, hierarchy = cv2.findContours(filtered, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+                            for contour in contours:
+                                if cv2.contourArea(contour) >= 250:
+                                    # We found it!
+                                    self.foundRequirements.add(item)
+                                    # Draw contours
+                                    cv2.drawContours(frame, [contour], 0, hsv_to_bgr(*db.items[item]['lower']), 4)
+                    # Forward stream to ffmpeg
+                    # TODO - the real thing
+                    cv2.imshow('tmp output', frame)
+                    # Press escape to quit
+                    if cv2.waitKey(1) == 27:
+                        break
+                self.__stream.release()
             self.__stream = None
         finally:
             if self.__stream is not None:
                 self.__stream.release()
                 self.__stream = None
+            print('Stream stopped.')
 
     def stop(self):
         if self.__stream is None:
@@ -57,27 +84,22 @@ class FeedEater(Thread):
         self.__lock.acquire()
         self.__run = False
         self.__lock.release()
+        self.join()
 
-    def set_recipe(self, recipe = None):
+    def set_requirements(self, requirements):
         self.__lock.acquire()
-        self.__recipe = recipe
-        self.__foundRequirements = []
+        self.__requirements = set(requirements)
         self.__lock.release()
 
-class Vector2(object):
-    '''
-    Attributes:
-        x (int): X position of the point.
-        y (int): Y position of the point.
-    '''
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+    def reset_found_requirements(self):
+        self.__lock.acquire()
+        self.__foundRequirements = set()
+        self.__lock.release()
 
     @property
-    def value(self):
-        return [self.x, self.y]
+    def foundRequirements(self):
+        return set(self.__foundRequirements)
 
-    @value.setter
-    def value(self, value):
-        self.x, self.y = value
+def hsv_to_bgr(h, s, v):
+    r, g, b = hsv_to_rgb(h / 255, s / 255, v / 255)
+    return [int(c * 255) for c in [b, g, r]]
