@@ -14,7 +14,6 @@ CORS(app, origins="*", allow_headers=[
     supports_credentials=True)
 
 recipe = None
-completedSteps = set()
 
 class Recipes(Resource):
     
@@ -28,13 +27,15 @@ class Recipe(Resource):
     def get(self, recipeName):
         
         global recipe
-        global completedSteps
         
-        for k, v in recipes.items():
-            if recipeName.lower() in k.lower():      
-                recipe = recipes[recipeName]
-                recipe['name'] = recipeName
-                feed.set_recipe(recipeName)
+        if recipe == None or recipe['name'] != recipeName:
+            for k, v in recipes.items():
+                if recipeName.lower() in k.lower():      
+                    recipe = recipes[recipeName]
+                    recipe['name'] = recipeName
+                    feed.set_recipe(recipeName)
+        
+            recipe['steps'][0]['currentStep'] = True
         
         for requirement in recipe['requirements']:
             requirement['found'] = requirement['item'] in feed.foundRequirements
@@ -42,23 +43,24 @@ class Recipe(Resource):
         #test
         recipe['requirements'][1]['found'] = True
             
-        for step in recipe['steps']:
-            step['done'] = step['name'] in completedSteps
-            
         return jsonify(recipe)
 
 class Step(Resource):
 
-    def get(self):
+    def get(self, id):
         
         global recipe
-        global completedSteps
-        
-        completedSteps.add(recipe['steps'][len(completedSteps)])
+
+        recipe['steps'][id]['currentStep'] = True
+        if recipe['steps'][id - 1]:
+            recipe['steps'][id - 1]['currentStep'] = False
+            recipe['steps'][id - 1]['completed'] = True
+            
+        return jsonify(recipe['steps'][id])
         
 api.add_resource(Recipes, '/recipes')
 api.add_resource(Recipe, '/recipes/<string:recipeName>')
-api.add_resource(Step, '/step')
+api.add_resource(Step, '/step/<int:id>')
         
 if __name__ == '__main__':
     try:
