@@ -3,7 +3,10 @@ from flask_restful import Resource, Api
 from flask_cors import CORS
 
 from db import recipes
+from cv import FeedEater
 
+feed = FeedEater()
+feed.start()
 app = Flask(__name__)
 api = Api(app)
 CORS(app, origins="*", allow_headers=[
@@ -14,14 +17,19 @@ class Recipes(Resource):
     
     def get(self):
         
+        feed.set_recipe()
         return jsonify(recipes)
 
 class Recipe(Resource):
     
     def get(self, recipeName):
         
-        self.recipe = recipes[recipeName]
-        return jsonify(self.recipe['requirements'])
+        for k, v in recipes.items():
+            if recipeName.lower() in k.lower():      
+                self.recipe = {k : recipes[recipeName]}
+                feed.set_recipe(recipeName)
+                
+        return jsonify(self.recipe)
 
 class Inventory(Resource):
     
@@ -29,7 +37,7 @@ class Inventory(Resource):
         return None
         
 api.add_resource(Recipes, '/recipes/')
-api.add_resource(Recipe, '/recipes/<recipeName>')
+api.add_resource(Recipe, '/recipes/<string:recipeName>')
 api.add_resource(Inventory, '/inventory')
         
 if __name__ == '__main__':
