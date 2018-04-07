@@ -1,3 +1,4 @@
+from threading import Thread, Condition
 import cv2
 
 class StreamNotStartedException(Exception):
@@ -8,7 +9,7 @@ class StreamAlreadyStartedException(Exception):
     def __init__(self):
         Exception.__init__(self, 'The stream must be stopped to perform this operation.')
 
-class FeedEater(object):
+class FeedEater(Thread):
     def __init__(self, webcamIndex = 0):
         '''
         Args:
@@ -56,11 +57,22 @@ class FeedEater(object):
         Requires the stream to be started.
 
         Args:
-            item (Item): Item to be searched for.
+            item (str): Item to be searched for.
         '''
         if self.__stream is None:
             raise StreamNotStartedException()
+        frame = self.__get_frame()
+        # Recognize stuff here
         return ItemResult()
+
+    def __get_frame(self):
+        '''
+        Gets a frame from the webcam stream.
+
+        Returns:
+            image: A cv2 image.
+        '''
+        return "Hi, I'm an image!"
 
 class ItemResult(object):
     '''
