@@ -57,6 +57,7 @@ class FeedEater(Thread):
         self.__lock.acquire()
         self.__run = False
         self.__lock.release()
+        self.join()
 
     def set_recipe(self, recipe = None):
         self.__lock.acquire()
