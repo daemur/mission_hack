@@ -33,7 +33,8 @@ class Recipe(Resource):
                 if recipeName.lower() in k.lower():      
                     recipe = recipes[recipeName]
                     recipe['name'] = recipeName
-                    feed.set_recipe(recipeName)
+                    feed.reset_found_requirements()
+                    feed.set_requirements([x['name'] for x in recipe['requirements'])
         
             recipe['steps'][0]['currentStep'] = True
         
@@ -55,6 +56,8 @@ class Step(Resource):
         if recipe['steps'][id - 1]:
             recipe['steps'][id - 1]['currentStep'] = False
             recipe['steps'][id - 1]['completed'] = True
+        
+        feed.set_requirements([x for x in recipe['steps'][id]['item']])
             
         return jsonify(recipe['steps'][id])
         
