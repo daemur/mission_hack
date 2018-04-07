@@ -17,12 +17,14 @@ class FeedEater(Thread):
         self.__run = True
         # Recipe stuff
         self.__recipe = None
+        # Thread init
+        Thread.__init__(self)
 
     def run(self):
         self.__stream = cv2.VideoCapture(0)
         while self.__run:
             # Grab a frame
-
+            pass
             # Find objects and draw them
             if self.__recipe is not None:
                 self.__lock.acquire()
@@ -39,8 +41,9 @@ class FeedEater(Thread):
     def stop(self):
         if self.__stream is None:
             raise StreamNotStartedException()
-        self.__stream.release()
-        self.__stream = None
+        self.__lock.acquire()
+        self.__run = False
+        self.__lock.release()
 
     def set_recipe(self, recipe = None):
         self.__lock.acquire()
