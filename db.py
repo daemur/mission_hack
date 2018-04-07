@@ -2,10 +2,8 @@ recipes = {'Test Recipe': {'requirements': [{'item': 'Test Item 1',
                                              'optional': False},
                                             {'item': 'Test Item 2',
                                              'optional': True}],
-                           'steps': [{'name' : 'Test Step 1',
-                                      'done' : False},
-                                     {'name' : 'Test Step 2',
-                                      'done' : False}]}}
+                           'steps': [{'name' : 'Test Step 1'},
+                                     {'name' : 'Test Step 2'}]}}
 
 items = {'Test Item 1': {'color': [0, 255, 255],
                          'tolerance': [16, 96, 96],

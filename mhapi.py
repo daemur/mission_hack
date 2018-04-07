@@ -13,6 +13,9 @@ CORS(app, origins="*", allow_headers=[
     "Content-Type", "Authorization", "Access-Control-Allow-Credentials"],
     supports_credentials=True)
 
+recipe = None
+completedSteps = []
+
 class Recipes(Resource):
     
     def get(self):
@@ -24,26 +27,32 @@ class Recipe(Resource):
     
     def get(self, recipeName):
         
+        global recipe
+        global completedSteps
+        
         for k, v in recipes.items():
             if recipeName.lower() in k.lower():      
-                self.recipe = recipes[recipeName]
-                self.recipe['name'] = recipeName
+                recipe = recipes[recipeName]
+                recipe['name'] = recipeName
                 feed.set_recipe(recipeName)
-                
-        return jsonify(self.recipe)
-
-class Inventory(Resource):
-    
-    def get(self):
-        return None
         
-api.add_resource(Recipes, '/recipes/')
+        for requirement in recipe['requirements']:
+            requirement['found'] = requirement['item'] in feed.foundRequirements
+            
+        for step in recipe['steps']:
+            step['done'] = step['name'] in completedSteps
+            if completedSteps:
+                step['currentStep'] = 
+            
+        return jsonify(recipe)
+
+    
+api.add_resource(Recipes, '/recipes')
 api.add_resource(Recipe, '/recipes/<string:recipeName>')
-api.add_resource(Inventory, '/inventory')
         
 if __name__ == '__main__':
     try:
-        feed.start()
+        #feed.start()
         app.run(port=2600)
     except KeyboardInterrupt:
         feed.stop()
