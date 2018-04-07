@@ -14,7 +14,7 @@ CORS(app, origins="*", allow_headers=[
     supports_credentials=True)
 
 recipe = None
-completedSteps = []
+completedSteps = set()
 
 class Recipes(Resource):
     
@@ -41,12 +41,18 @@ class Recipe(Resource):
             
         for step in recipe['steps']:
             step['done'] = step['name'] in completedSteps
-            if completedSteps:
-                step['currentStep'] = 
             
         return jsonify(recipe)
 
-    
+class Step(Resource):
+
+    def get(self):
+        
+        global recipe
+        global completedSteps
+        
+        completedSteps.add(recipe['steps'][len(completedSteps)])
+        
 api.add_resource(Recipes, '/recipes')
 api.add_resource(Recipe, '/recipes/<string:recipeName>')
         
