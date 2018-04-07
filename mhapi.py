@@ -5,8 +5,8 @@ from flask_cors import CORS
 from db import recipes
 from cv import FeedEater
 
+
 feed = FeedEater()
-feed.start()
 app = Flask(__name__)
 api = Api(app)
 CORS(app, origins="*", allow_headers=[
@@ -26,7 +26,8 @@ class Recipe(Resource):
         
         for k, v in recipes.items():
             if recipeName.lower() in k.lower():      
-                self.recipe = {k : recipes[recipeName]}
+                self.recipe = recipes[recipeName]
+                self.recipe['name'] = recipeName
                 feed.set_recipe(recipeName)
                 
         return jsonify(self.recipe)
@@ -41,4 +42,8 @@ api.add_resource(Recipe, '/recipes/<string:recipeName>')
 api.add_resource(Inventory, '/inventory')
         
 if __name__ == '__main__':
-     app.run(port=2600)
+    try:
+        feed.start()
+        app.run(port=2600)
+    except KeyboardInterupt as e:
+        feed.stop()
