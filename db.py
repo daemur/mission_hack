@@ -5,10 +5,11 @@ recipes = {'Test Recipe': {'requirements': [{'item': 'Test Item 1',
                            'steps': ['Test Step 1',
                                      'Test Step 2']}}
 
-items = {'Red': {'color': [0, 255, 192]},
-         'Orange': {'color': [20, 255, 192]},
-         'Yellow': {'color': [45, 255, 192]},
-         'Green': {'color': [80, 255, 192]},
-         'Blue': {'color': [140, 255, 192]},
-         'Indigo': {'color': [160, 255, 192]},
-         'Black': {'color': [0, 16, 32]}}
+items = {'Red': {'color': [4, 98, 46]},
+         'Orange': {'color': [9, 100, 58]},
+         'Yellow': {'color': [48, 53, 59]},
+         'Lime': {'color': [157, 78, 33]},
+         'Green': {'color': [189, 96, 10]},
+         'Blue': {'color': [210, 100, 31]},
+         'Indigo': {'color': [215, 100, 14]},
+         'Brown': {'color': [16, 100, 9]}}

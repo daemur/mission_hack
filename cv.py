@@ -50,7 +50,7 @@ class FeedEater(Thread):
                         # Find recipe items in frame
                         for item in items:
                             color = hsv_to_bgr(*db.items[item]['color'])
-                            tolerance = 32
+                            tolerance = 24
                             low = [max(*c) for c in zip([0, 0, 0], [c - tolerance for c in color])]
                             high = [min(*c) for c in zip([255, 255, 255], [c + tolerance for c in color])]
                             if self.__print:
@@ -68,7 +68,7 @@ class FeedEater(Thread):
                                     # We found it!
                                     self.__foundRequirements.add(item)
                                     # Draw contours
-                                    cv2.drawContours(frame, [contour], 0, hsv_to_bgr(*db.items[item]['color']), 4)
+                                    cv2.drawContours(frame, [contour], 0, (255, 128, 0), 4)
                         self.__print = False
                     # Forward stream to ffmpeg
                     # TODO - the real thing
@@ -92,7 +92,7 @@ class FeedEater(Thread):
         self.__lock.release()
         self.join()
 
-    def set_requirements(self, requirements):
+    def set_requirements(self, requirements = []):
         self.__lock.acquire()
         self.__requirements = set(requirements)
         self.__lock.release()
@@ -107,5 +107,5 @@ class FeedEater(Thread):
         return set(self.__foundRequirements)
 
 def hsv_to_bgr(h, s, v):
-    r, g, b = hsv_to_rgb(h / 255, s / 255, v / 255)
+    r, g, b = hsv_to_rgb(h / 360.0, s / 100.0, v / 100.0)
     return [int(c * 255) for c in [b, g, r]]
