@@ -5,34 +5,47 @@ class StreamNotStartedException(Exception):
     def __init__(self):
         Exception.__init__(self, 'The stream must be started to perform this operation.')
 
-class StreamAlreadyStartedException(Exception):
-    def __init__(self):
-        Exception.__init__(self, 'The stream must be stopped to perform this operation.')
-
 class FeedEater(Thread):
     def __init__(self, webcamIndex = 0):
         '''
         Args:
             webcamIndex (int): The ID of the webcam to capture from.
         '''
+        # Thread stuff
+        self.__stream = None
+        self.__lock = Condition()
+        self.__run = True
+        # Recipe stuff
+        self.__recipe = None
+
+    def run(self):
+        self.__stream = cv2.VideoCapture(0)
+        while self.__run:
+            # Grab a frame
+
+            # Find objects and draw them
+            if self.__recipe is not None:
+                self.__lock.acquire()
+                recipe = db.recipes[self.__recipe]
+                self.__lock.release()
+            # Forward stream to ffmpeg
+            # thx Brandon
+        self.__stream.release()
         self.__stream = None
 
-    def start(self):
-        '''
-        Starts streaming the primary webcam.
-        '''
-        if self.__stream is not None:
-            raise StreamAlreadyStartedException()
-        self.__stream = cv2.VideoCapture(0)
+    def __del__(self):
+        self.stop()
 
     def stop(self):
-        '''
-        Stops the webcam stream.
-        '''
         if self.__stream is None:
             raise StreamNotStartedException()
         self.__stream.release()
         self.__stream = None
+
+    def set_recipe(self, recipe = None):
+        self.__lock.acquire()
+        self.__recipe = recipe
+        self.__lock.release()
 
     def find_items(self, items):
         '''
