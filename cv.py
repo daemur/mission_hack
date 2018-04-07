@@ -15,6 +15,7 @@ class FeedEater(Thread):
         Args:
             webcamIndex (int): The ID of the webcam to capture from.
         '''
+        self.__webcamIndex = webcamIndex
         # Thread stuff
         self.__stream = None
         self.__lock = Condition()
@@ -22,12 +23,14 @@ class FeedEater(Thread):
         # Recipe stuff
         self.__requirements = set()
         self.__foundRequirements = set()
+        # Debug stuff
+        self.__print = True
         # Thread init
         Thread.__init__(self)
 
     def run(self):
         try:
-            self.__stream = cv2.VideoCapture(0)
+            self.__stream = cv2.VideoCapture(self.__webcamIndex)
             if self.__stream.isOpened():
                 print('Stream started.')
                 while self.__run:
@@ -44,16 +47,18 @@ class FeedEater(Thread):
                         self.__lock.acquire()
                         items = set(self.__requirements)
                         self.__lock.release()
-                        # Convert frame to HSV
-                        hsvFrame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
                         # Find recipe items in frame
                         for item in items:
-                            low = hsv_to_bgr(*db.items[item]['lower'])
-                            high = hsv_to_bgr(*db.items[item]['upper'])
+                            color = hsv_to_bgr(*db.items[item]['color'])
+                            tolerance = 24
+                            low = [max(*c) for c in zip([0, 0, 0], [c - tolerance for c in color])]
+                            high = [min(*c) for c in zip([255, 255, 255], [c + tolerance for c in color])]
+                            if self.__print:
+                                print("{}: {}, {}".format(item, low, high))
                             # Threshold
-                            masked = cv2.inRange(hsvFrame,
-                                                 np.array([min(*c) for c in zip(low, high)]),
-                                                 np.array([max(*c) for c in zip(low, high)]))
+                            masked = cv2.inRange(frame,
+                                                 np.array(low),
+                                                 np.array(high))
                             # Filter noise
                             filtered = cv2.medianBlur(masked, 5)
                             # Contour
@@ -61,9 +66,10 @@ class FeedEater(Thread):
                             for contour in contours:
                                 if cv2.contourArea(contour) >= 250:
                                     # We found it!
-                                    self.foundRequirements.add(item)
+                                    self.__foundRequirements.add(item)
                                     # Draw contours
-                                    cv2.drawContours(frame, [contour], 0, hsv_to_bgr(*db.items[item]['lower']), 4)
+                                    cv2.drawContours(frame, [contour], 0, (255, 128, 0), 4)
+                        self.__print = False
                     # Forward stream to ffmpeg
                     # TODO - the real thing
                     cv2.imshow('tmp output', frame)
@@ -86,7 +92,7 @@ class FeedEater(Thread):
         self.__lock.release()
         self.join()
 
-    def set_requirements(self, requirements):
+    def set_requirements(self, requirements = []):
         self.__lock.acquire()
         self.__requirements = set(requirements)
         self.__lock.release()
@@ -101,5 +107,5 @@ class FeedEater(Thread):
         return set(self.__foundRequirements)
 
 def hsv_to_bgr(h, s, v):
-    r, g, b = hsv_to_rgb(h / 255, s / 255, v / 255)
+    r, g, b = hsv_to_rgb(h / 360.0, s / 100.0, v / 100.0)
     return [int(c * 255) for c in [b, g, r]]
