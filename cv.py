@@ -1,6 +1,8 @@
 from threading import Thread, Condition
 import cv2
 
+import db
+
 class StreamNotStartedException(Exception):
     def __init__(self):
         Exception.__init__(self, 'The stream must be started to perform this operation.')
@@ -17,21 +19,28 @@ class FeedEater(Thread):
         self.__run = True
         # Recipe stuff
         self.__recipe = None
+        # Thread init
+        Thread.__init__(self)
 
     def run(self):
-        self.__stream = cv2.VideoCapture(0)
-        while self.__run:
-            # Grab a frame
-
-            # Find objects and draw them
-            if self.__recipe is not None:
-                self.__lock.acquire()
-                recipe = db.recipes[self.__recipe]
-                self.__lock.release()
-            # Forward stream to ffmpeg
-            # thx Brandon
-        self.__stream.release()
-        self.__stream = None
+        try:
+            self.__stream = cv2.VideoCapture(0)
+            while self.__run:
+                # Grab a frame
+                pass
+                # Find objects and draw them
+                if self.__recipe is not None:
+                    self.__lock.acquire()
+                    recipe = db.recipes[self.__recipe]
+                    self.__lock.release()
+                # Forward stream to ffmpeg
+                # thx Brandon
+            self.__stream.release()
+            self.__stream = None
+        except:
+            if self.__stream is not None:
+                self.__stream.release()
+                self.__stream = None
 
     def __del__(self):
         self.stop()
@@ -39,8 +48,9 @@ class FeedEater(Thread):
     def stop(self):
         if self.__stream is None:
             raise StreamNotStartedException()
-        self.__stream.release()
-        self.__stream = None
+        self.__lock.acquire()
+        self.__run = False
+        self.__lock.release()
 
     def set_recipe(self, recipe = None):
         self.__lock.acquire()
