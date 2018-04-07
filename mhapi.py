@@ -53,6 +53,7 @@ class Step(Resource):
         global recipe
 
         recipe['steps'][id]['currentStep'] = True
+        recipe['steps'][id]['completed'] = True
         if id != 0:
             recipe['steps'][id - 1]['currentStep'] = False
             recipe['steps'][id - 1]['completed'] = True
