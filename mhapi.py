@@ -45,5 +45,5 @@ if __name__ == '__main__':
     try:
         feed.start()
         app.run(port=2600)
-    except KeyboardInterupt as e:
+    except KeyboardInterrupt:
         feed.stop()
