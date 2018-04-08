@@ -5,11 +5,11 @@ recipes = {'Test Recipe': {'requirements': [{'item': 'Red',
 											{'item': 'Brown',
                                              'optional': False},
                                             {'item': 'Indigo',
-                                             'optional': False}
+                                             'optional': False},
 											{'item': 'Yellow',
                                              'optional': False},
                                             {'item': 'Lime',
-                                             'optional': False}
+                                             'optional': False},
 											{'item': 'Orange',
                                              'optional': False}],
                            'steps': [{'name' : 'Insert Rod A into Slot B',
