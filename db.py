@@ -103,17 +103,17 @@ recipes = {'Test Recipe': {'requirements': [{'item': 'Red',
                                      {'name' : 'Test Step 2',
                                       'item' : ['Yellow']}]}}
 
-items = {'Roof': {'color': [5, 97, 57]}, # Red
+items = {'Roof': {'color': [4, 98, 76]}, # Red
          'Orange': {'color': [9, 100, 58]}, # Orange
-         'Screws': {'color': [44, 65, 67]}, # Yellow
-         'Mounting Bracket': {'color': [159, 76, 25]}, # Lime
+         'Screws': {'color': [55, 45, 82]}, # Yellow
+         'Mounting Bracket': {'color': [155, 49, 33]}, # Lime
          'Green': {'color': [189, 96, 10]}, # Green
          'Hinge': {'color': [213, 78, 25]}, # Blue
          'Indigo': {'color': [215, 100, 14]}, # Indigo
          'Brown': {'color': [16, 100, 9]}, # Brown
          'White': {'color': [0, 0, 71]}, # White
-         'Screwdriver': {'color': [75, 100, 1]}, # Black
-         'Birdhouse Base': {'color': [40, 4, 53]}, # Painted white
+         'Screwdriver': {'color': [75, 100, 10]}, # Black
+         'Birdhouse Base': {'color': [20, 1, 84]}, # Painted white
 		 'Plank of Wood': {'color': [281, 100, 100]},
 		 'Nail': {'color': [281, 100, 100]},
 		 'test3': {'color': [281, 100, 100]},
