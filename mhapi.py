@@ -19,7 +19,6 @@ class Recipes(Resource):
     
     def get(self):
         
-        feed.set_recipe()
         return jsonify(recipes)
 
 class Recipe(Resource):
