@@ -13,6 +13,8 @@ CORS(app, origins="*", allow_headers=[
     "Content-Type", "Authorization", "Access-Control-Allow-Credentials"],
     supports_credentials=True)
 
+recipe = None
+
 class Recipes(Resource):
     
     def get(self):
@@ -24,22 +26,46 @@ class Recipe(Resource):
     
     def get(self, recipeName):
         
-        for k, v in recipes.items():
-            if recipeName.lower() in k.lower():      
-                self.recipe = recipes[recipeName]
-                self.recipe['name'] = recipeName
-                feed.set_recipe(recipeName)
-                
-        return jsonify(self.recipe)
-
-class Inventory(Resource):
-    
-    def get(self):
-        return None
+        global recipe
         
-api.add_resource(Recipes, '/recipes/')
+        if recipe == None or recipe['name'] != recipeName:
+            for k, v in recipes.items():
+                if recipeName.lower() in k.lower():      
+                    recipe = recipes[recipeName]
+                    recipe['name'] = recipeName
+                    feed.reset_found_requirements()
+                    feed.set_requirements([x['item'] for x in recipe['requirements']])
+        
+            recipe['currentStep'] = 0
+        
+        for requirement in recipe['requirements']:
+            requirement['found'] = requirement['item'] in feed.foundRequirements
+            
+        return jsonify(recipe)
+
+class Step(Resource):
+
+    def get(self, id):
+        
+        global recipe
+
+        
+        if id != 0:
+            recipe['steps'][id - 1]['completed'] = True
+        
+        if id <= len(recipe['steps']) - 1:
+            recipe['steps'][id]['completed'] = False
+            feed.set_requirements([x for x in recipe['steps'][id]['item']])
+            recipe['currentStep'] = id
+            return jsonify(recipe['steps'][id])
+        else:
+            feed.set_requirements()
+            return {'done' : True}
+            
+        
+api.add_resource(Recipes, '/recipes')
 api.add_resource(Recipe, '/recipes/<string:recipeName>')
-api.add_resource(Inventory, '/inventory')
+api.add_resource(Step, '/step/<int:id>')
         
 if __name__ == '__main__':
     try:
