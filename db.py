@@ -23,15 +23,15 @@ recipes = {'Test Recipe': {'requirements': [{'item': 'Red',
 
 		    'Birdhouse': {'requirements': [{'item': 'Birdhouse Base',
                                              'optional': False},
-                                            {'item': 'Yellow',
+                                            {'item': 'Roof',
                                              'optional': False},
-											{'item': 'Yellow',
+											{'item': 'Hinge',
                                              'optional': False},
-											{'item': 'Yellow',
+											{'item': 'Screws',
                                              'optional': False},
-											{'item': 'Yellow',
+											{'item': 'Mounting Bracket',
                                              'optional': False},
-											{'item': 'Yellow',
+											{'item': 'Screwdriver',
                                              'optional': False}],
                            'steps': [{'name' : 'Place hinge with blue side out into the highlighted area. Align the two lower holes with the screw targets on the the birdhouse, and use the screwdriver with screws to attach hinge to the birdhouse.',
                                       'item' : ['Birdhouse Base, ', 'Hinge, ', 'Screws, ', 'Screwdriver'],
@@ -62,11 +62,6 @@ recipes = {'Test Recipe': {'requirements': [{'item': 'Red',
                                                    'position': [-0.1, 1.1, 1.1, 1.1]}]},
 									 {'name' : 'Align mounting bracket into the higlighted area. Use screwdriver to attach mounting bracket to the birdhouse.',
                                       'item' : ['Mounting Bracket, ' 'Screws, ' 'Screwdriver'],
-                                      'targets': [{'item': 'Birdhouse Bottom',
-                                                   'type': 'line',
-                                                   'position': [-0.1, 1.1, 1.1, 1.1]}]},
-									 {'name' : 'Test Step 2',
-                                      'item' : ['Yellow'],
                                       'targets': [{'item': 'Birdhouse Bottom',
                                                    'type': 'line',
                                                    'position': [-0.1, 1.1, 1.1, 1.1]}]}]},
@@ -108,16 +103,16 @@ recipes = {'Test Recipe': {'requirements': [{'item': 'Red',
                                      {'name' : 'Test Step 2',
                                       'item' : ['Yellow']}]}}
 
-items = {'Red': {'color': [5, 97, 57]}, # Red
+items = {'Roof': {'color': [5, 97, 57]}, # Red
          'Orange': {'color': [9, 100, 58]}, # Orange
-         'Yellow': {'color': [44, 65, 67]}, # Yellow
-         'Lime': {'color': [159, 76, 25]}, # Lime
+         'Screws': {'color': [44, 65, 67]}, # Yellow
+         'Mounting Bracket': {'color': [159, 76, 25]}, # Lime
          'Green': {'color': [189, 96, 10]}, # Green
-         'Blue': {'color': [213, 78, 25]}, # Blue
+         'Hinge': {'color': [213, 78, 25]}, # Blue
          'Indigo': {'color': [215, 100, 14]}, # Indigo
          'Brown': {'color': [16, 100, 9]}, # Brown
          'White': {'color': [0, 0, 71]}, # White
-         'Black': {'color': [75, 100, 1]}, # Black
+         'Screwdriver': {'color': [75, 100, 1]}, # Black
          'Birdhouse Base': {'color': [40, 4, 53]}, # Painted white
 		 'Plank of Wood': {'color': [281, 100, 100]},
 		 'Nail': {'color': [281, 100, 100]},
