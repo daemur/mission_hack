@@ -69,10 +69,11 @@ class FeedEater(Thread):
                 #                           '-pixel_format', 'bgr24',
                 #                           '-video_size', '{}x{}'.format(w, h),
                 #                           '-i', '-',
-                #                           '-acodec', 'libvorbis',
-                #                           '-vcodec', 'libtheora'
-                #                           '-f', 'ogg',
-                #                           'feed.ogv'],
+                #                           '-f', 'mp4',
+                #                           '-vcodec', 'libx264',
+                #                           '-preset', 'ultrafast',
+                #                           '-acodec', 'aac',
+                #                           'feed.mp4'],
                 #                          stdin = sp.PIPE)
                 while self.__run:
                     # Grab a frame
