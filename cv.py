@@ -64,17 +64,17 @@ class FeedEater(Thread):
                 #                           '-f', 'mpegts',
                 #                           'udp://localhost:8090'],
                 #                          stdin = sp.PIPE)
-                self.__ffmpeg = sp.Popen(['ffmpeg',
-                                          '-f', 'rawvideo',
-                                          '-pixel_format', 'bgr24',
-                                          '-video_size', '{}x{}'.format(w, h),
-                                          '-i', '-',
-                                          '-f', 'mp4',
-                                          '-vcodec', 'libx264',
-                                          '-preset', 'ultrafast',
-                                          '-acodec', 'aac',
-                                          'feed.mp4'],
-                                         stdin = sp.PIPE)
+                # self.__ffmpeg = sp.Popen(['ffmpeg',
+                #                           '-f', 'rawvideo',
+                #                           '-pixel_format', 'bgr24',
+                #                           '-video_size', '{}x{}'.format(w, h),
+                #                           '-i', '-',
+                #                           '-f', 'mp4',
+                #                           '-vcodec', 'libx264',
+                #                           '-preset', 'ultrafast',
+                #                           '-acodec', 'aac',
+                #                           'feed.mp4'],
+                #                          stdin = sp.PIPE)
                 while self.__run:
                     # Grab a frame
                     success, frame = self.__stream.read()
@@ -140,12 +140,12 @@ class FeedEater(Thread):
                                     cv2.drawContours(frame, [box], 0, (0, 128, 255), 4)
                             boxesDrawn.add(target['item'])
                     # Forward stream to ffmpeg
-                    self.__ffmpeg.stdin.write(frame.tostring())
-                    # # TODO - the real thing
-                    # cv2.imshow('tmp output', frame)
-                    # # Press escape to quit
-                    # if cv2.waitKey(1) == 27:
-                    #    break
+                    # self.__ffmpeg.stdin.write(frame.tostring())
+                    # TODO - the real thing
+                    cv2.imshow('tmp output', frame)
+                    # Press escape to quit
+                    if cv2.waitKey(1) == 27:
+                       break
                 self.__stream.release()
             self.__stream = None
         finally:
