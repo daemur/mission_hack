@@ -5,8 +5,11 @@ recipes = {'Test Recipe': {'requirements': [{'item': 'Red',
                            'steps': [{'name' : 'Insert Rod A into Slot B',
                                       'item' : ['Red']},
                                      {'name' : 'The quick brown fox jumps over the lazy dog.',
-                                      'item' : ['Yellow']}]},
-		   
+                                      'item' : ['Yellow']}],
+									 {'name' : 'Test Step 3',
+                                      'item' : ['Lime']},
+                                     {'name' : 'Test Step 4 Test Step 4 Test Step 4 Test Step 4 Test Step 4 Test Step 4 Test Step 4',
+                                      'item' : ['Orange']}]},
 		   
 		   'Birdhouse': {'requirements': [{'item': 'Red',
                                              'optional': False},
