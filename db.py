@@ -45,7 +45,7 @@ recipes = {'Test Recipe': {'requirements': [{'item': 'Red',
                                                    'type': 'rectangle',
                                                    'position': [0.25, 1, 0.1, 0.1]}]},
                                      {'name' : 'Test Step 2',
-                                      'item' : ['Yellow']
+                                      'item' : ['Yellow'],
                                       'targets': [{'item': 'Birdhouse Bottom',
                                                    'type': 'line',
                                                    'position': [-0.1, 1.1, 1.1, 1.1]}]}]},

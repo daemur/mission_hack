@@ -103,6 +103,7 @@ class FeedEater(Thread):
                                 if target['item'] not in boxesDrawn:
                                     box = np.int0(cv2.boxPoints(rect))
                                     cv2.drawContours(frame, [box], 0, (0, 224, 255), 4)
+                                # Make angle point up
                                 angleTarget = 180
                                 angleRange = 46
                                 angle = rect[2]
@@ -110,13 +111,32 @@ class FeedEater(Thread):
                                 while abs(angle_difference(angle, angleTarget)) >= angleRange:
                                     angle = (angle + 90) % 360
                                     w, h = h, w
-                                # if angle >= 180:
-                                #     angle -= 180
-                                # Draw the target point
-                                pos = rotate_point((0, 0),
-                                                   [c[0] * c[1] - c[0] * 0.5 for c in zip((w, h), target['position'])],
-                                                   angle)
-                                cv2.circle(frame, tuple(int(n[0] + n[1]) for n in zip(rect[0], pos)), 2, (0, 128, 255), 3)
+                                if target['type'] == 'point':
+                                    # Point target
+                                    pos = rotate_point((0, 0),
+                                                       [c[0] * c[1] - c[0] * 0.5 for c in zip((w, h), target['position'])],
+                                                       angle)
+                                    cv2.circle(frame, tuple(int(n[0] + n[1]) for n in zip(rect[0], pos)), 2, (0, 128, 255), 3)
+                                elif target['type'] == 'line':
+                                    # Line target
+                                    pos1 = rotate_point((0, 0),
+                                                        [c[0] * c[1] - c[0] * 0.5 for c in zip((w, h), target['position'][:2])],
+                                                        angle)
+                                    pos1 = tuple(int(n[0] + n[1]) for n in zip(rect[0], pos1))
+                                    pos2 = rotate_point((0, 0),
+                                                        [c[0] * c[1] - c[0] * 0.5 for c in zip((w, h), target['position'][2:])],
+                                                        angle)
+                                    pos2 = tuple(int(n[0] + n[1]) for n in zip(rect[0], pos2))
+                                    cv2.line(frame, pos1, pos2, (0, 128, 255), 4)
+                                elif target['type'] == 'rectangle':
+                                    # Rectangle target
+                                    pos = rotate_point((0, 0),
+                                                       [c[0] * c[1] - c[0] * 0.5 for c in zip((w, h), target['position'][:2])],
+                                                       angle)
+                                    pos = tuple(int(n[0] + n[1]) for n in zip(rect[0], pos))
+                                    box2d = (pos, tuple(int(n[0] * n[1]) for n in zip((w, h), target['position'][2:])), (angle + 180) % 360)
+                                    box = np.int0(cv2.boxPoints(box2d))
+                                    cv2.drawContours(frame, [box], 0, (0, 128, 255), 4)
                             boxesDrawn.add(target['item'])
                     # Forward stream to ffmpeg
                     # self.__ffmpeg.stdin.write(frame.tostring())
