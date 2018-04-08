@@ -2,6 +2,7 @@ from threading import Thread, Condition
 from colorsys import hsv_to_rgb
 import subprocess as sp
 import numpy as np
+import math
 import cv2
 
 import db
@@ -11,12 +12,13 @@ class StreamNotStartedException(Exception):
         Exception.__init__(self, 'The stream must be started to perform this operation.')
 
 class FeedEater(Thread):
-    def __init__(self, webcamIndex = 0):
+    def __init__(self, webcamIndex = 0, tolerance = 24):
         '''
         Args:
             webcamIndex (int): The ID of the webcam to capture from.
         '''
         self.__webcamIndex = webcamIndex
+        self.__tolerance = tolerance
         # Thread stuff
         self.__stream = None
         self.__ffmpeg = None
@@ -24,9 +26,8 @@ class FeedEater(Thread):
         self.__run = True
         # Recipe stuff
         self.__requirements = set()
+        self.__targets = []
         self.__foundRequirements = set()
-        # Debug stuff
-        self.__print = True
         # Thread init
         Thread.__init__(self)
 
@@ -60,8 +61,8 @@ class FeedEater(Thread):
                 #                           '-vcodec', 'h264',
                 #                           '-acodec', 'none',
                 #                           '-tune', 'zerolatency',
-                #                           '-f', 'rtp',
-                #                           'rtp://localhost:8090'],
+                #                           '-f', 'mpegts',
+                #                           'udp://localhost:8090'],
                 #                          stdin = sp.PIPE)
                 # self.__ffmpeg = sp.Popen(['ffmpeg',
                 #                           '-f', 'rawvideo',
@@ -80,33 +81,43 @@ class FeedEater(Thread):
                         break
                     # Do recipe stuff to the image
                     if self.__requirements:
-                        # Get items from requirements
+                        # Get requirements and targets
                         self.__lock.acquire()
                         items = set(self.__requirements)
+                        targets = list(self.__targets)
                         self.__lock.release()
                         # Find recipe items in frame
                         for item in items:
-                            color = hsv_to_bgr(*db.items[item]['color'])
-                            tolerance = 24
-                            low = [max(*c) for c in zip([0, 0, 0], [c - tolerance for c in color])]
-                            high = [min(*c) for c in zip([255, 255, 255], [c + tolerance for c in color])]
-                            if self.__print:
-                                print("{}: {}, {}".format(item, low, high))
-                            # Threshold
-                            masked = cv2.inRange(frame,
-                                                 np.array(low),
-                                                 np.array(high))
-                            # Filter noise
-                            filtered = cv2.medianBlur(masked, 5)
-                            # Contour
-                            _, contours, hierarchy = cv2.findContours(filtered, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-                            for contour in contours:
-                                if cv2.contourArea(contour) >= 250:
-                                    # We found it!
-                                    self.__foundRequirements.add(item)
-                                    # Draw contours
-                                    cv2.drawContours(frame, [contour], 0, (255, 128, 0), 4)
-                        self.__print = False
+                            for contour in get_contours(frame, db.items[item]['color'], self.__tolerance):
+                                # We found it!
+                                self.__foundRequirements.add(item)
+                                # Draw contours
+                                cv2.drawContours(frame, [contour], 0, (255, 128, 0), 4)
+                        # Find targets in frame
+                        boxesDrawn = set()
+                        for target in targets:
+                            for contour in get_contours(frame, db.items[target['item']]['color'], self.__tolerance):
+                                # Find object min rectangle
+                                rect = cv2.minAreaRect(contour)
+                                # Draw box around target
+                                if target['item'] not in boxesDrawn:
+                                    box = np.int0(cv2.boxPoints(rect))
+                                    cv2.drawContours(frame, [box], 0, (0, 224, 255), 4)
+                                angleTarget = 180
+                                angleRange = 46
+                                angle = rect[2]
+                                w, h = rect[1]
+                                while abs(angle_difference(angle, angleTarget)) >= angleRange:
+                                    angle = (angle + 90) % 360
+                                    w, h = h, w
+                                # if angle >= 180:
+                                #     angle -= 180
+                                # Draw the target point
+                                pos = rotate_point((0, 0),
+                                                   [c[0] * c[1] - c[0] * 0.5 for c in zip((w, h), target['position'])],
+                                                   angle)
+                                cv2.circle(frame, tuple(int(n[0] + n[1]) for n in zip(rect[0], pos)), 2, (0, 128, 255), 3)
+                            boxesDrawn.add(target['item'])
                     # Forward stream to ffmpeg
                     # self.__ffmpeg.stdin.write(frame.tostring())
                     # TODO - the real thing
@@ -135,6 +146,11 @@ class FeedEater(Thread):
         self.__lock.release()
         self.join()
 
+    def set_targets(self, targets = []):
+        self.__lock.acquire()
+        self.__targets = list(targets)
+        self.__lock.release()
+
     def set_requirements(self, requirements = []):
         self.__lock.acquire()
         self.__requirements = set(requirements)
@@ -152,3 +168,33 @@ class FeedEater(Thread):
 def hsv_to_bgr(h, s, v):
     r, g, b = hsv_to_rgb(h / 360.0, s / 100.0, v / 100.0)
     return [int(c * 255) for c in [b, g, r]]
+
+def color_low_high(color, tolerance):
+    col = hsv_to_bgr(*color)
+    low = [max(*c) for c in zip([0, 0, 0], [c - tolerance for c in col])]
+    high = [min(*c) for c in zip([255, 255, 255], [c + tolerance for c in col])]
+    return low, high
+
+def get_contours(frame, color, tolerance, minArea = 250):
+    low, high = color_low_high(color, tolerance)
+    # Threshold
+    masked = cv2.inRange(frame,
+                         np.array(low),
+                         np.array(high))
+    # Filter noise
+    filtered = cv2.medianBlur(masked, 5)
+    # Contour
+    _, contours, _ = cv2.findContours(filtered, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    return [contour for contour in contours if cv2.contourArea(contour) >= minArea]
+
+def rotate_point(origin, point, angle):
+    rads = math.radians(angle)
+    ox, oy = origin
+    px, py = point
+
+    qx = ox + math.cos(rads) * (px - ox) - math.sin(rads) * (py - oy)
+    qy = oy + math.sin(rads) * (px - ox) + math.cos(rads) * (py - oy)
+    return int(qx), int(qy)
+
+def angle_difference(source, target):
+    return ((((target - source) % 360) + 540) % 360) - 180

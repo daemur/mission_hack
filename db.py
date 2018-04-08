@@ -10,17 +10,26 @@ recipes = {'Test Recipe': {'requirements': [{'item': 'Red',
                                       'item' : ['Lime']},
                                      {'name' : 'Test Step 4 Test Step 4 Test Step 4 Test Step 4 Test Step 4 Test Step 4 Test Step 4',
                                       'item' : ['Orange']}]},
-		   
+
 		   'Birdhouse': {'requirements': [{'item': 'Red',
                                              'optional': False},
                                             {'item': 'Yellow',
                                              'optional': False}],
                            'steps': [{'name' : 'Test Step 1',
-                                      'item' : ['Red']},
+                                      'item' : ['Red'],
+                                      'targets': [{'item': 'Birdhouse Bottom',
+                                                   'type': 'point',
+                                                   'position': [0.25, 0.95]},
+                                                  {'item': 'Birdhouse Bottom',
+                                                   'type': 'point',
+                                                   'position': [0.75, 0.95]}]},
                                      {'name' : 'Test Step 2',
-                                      'item' : ['Yellow']}]},
+                                      'item' : ['Yellow']
+                                      'targets': [{'item': 'Birdhouse Bottom',
+                                                   'type': 'line',
+                                                   'position': [-0.1, 1.1, 1.1, 1.1]}]}]},
 
-		   
+
 		   'Flux Capacitor': {'requirements': [{'item': 'Red',
                                              'optional': False},
                                             {'item': 'Yellow',
@@ -29,8 +38,8 @@ recipes = {'Test Recipe': {'requirements': [{'item': 'Red',
                                       'item' : ['Red']},
                                      {'name' : 'Test Step 2',
                                       'item' : ['Yellow']}]},
-									  
-									  
+
+
 		   'Water Filter': {'requirements': [{'item': 'Red',
                                              'optional': False},
                                             {'item': 'Yellow',
@@ -39,8 +48,8 @@ recipes = {'Test Recipe': {'requirements': [{'item': 'Red',
                                       'item' : ['Red']},
                                      {'name' : 'Test Step 2',
                                       'item' : ['Yellow']}]},
-									  
-									  
+
+
 		   'Plank of wood with a nail through it': {'requirements': [{'item': 'Plank of Wood',
                                              'optional': False},
                                             {'item': 'Nail',
@@ -49,7 +58,7 @@ recipes = {'Test Recipe': {'requirements': [{'item': 'Red',
                                       'item' : ['Red']},
                                      {'name' : 'Test Step 2',
                                       'item' : ['Yellow']}]}}
-									  
+
 items = {'Red': {'color': [4, 98, 46]}, # Red
          'Orange': {'color': [9, 100, 58]}, # Orange
          'Yellow': {'color': [48, 53, 59]}, # Yellow
@@ -58,7 +67,7 @@ items = {'Red': {'color': [4, 98, 46]}, # Red
          'Blue': {'color': [210, 100, 31]}, # Blue
          'Indigo': {'color': [215, 100, 14]}, # Indigo
          'Brown': {'color': [16, 100, 9]}, # Brown
-		 'Plank of Wood': {'color': [281, 100, 100]}, 
+		 'Plank of Wood': {'color': [281, 100, 100]},
 		 'Nail': {'color': [281, 100, 100]},
 		 'test3': {'color': [281, 100, 100]},
 		 'test4': {'color': [281, 100, 100]},
@@ -74,4 +83,4 @@ items = {'Red': {'color': [4, 98, 46]}, # Red
 		 'test14': {'color': [281, 100, 100]},
 		 'test15': {'color': [281, 100, 100]},
 		 'test16': {'color': [281, 100, 100]},
-		 'test17': {'color': [281, 100, 100]}}		 
+		 'test17': {'color': [281, 100, 100]}}
